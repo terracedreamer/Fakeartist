@@ -1,0 +1,67 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --canvas-bg: #ffffff;
+  --canvas-text: #1a1a1a;
+  --canvas-accent: #6366f1;
+  --canvas-card: #f8fafc;
+  --canvas-border: #e2e8f0;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+/* Theme: Dark & Artsy */
+[data-theme='dark-artsy'] {
+  --canvas-bg: #0f0f0f;
+  --canvas-text: #e8e8e8;
+  --canvas-accent: #a78bfa;
+  --canvas-card: #1a1a2e;
+  --canvas-border: #2d2d44;
+}
+
+/* Theme: Bright & Playful */
+[data-theme='bright-playful'] {
+  --canvas-bg: #fef9c3;
+  --canvas-text: #1e1b4b;
+  --canvas-accent: #f472b6;
+  --canvas-card: #fefce8;
+  --canvas-border: #fde68a;
+}
+
+/* Theme: Clean & Minimal */
+[data-theme='clean-minimal'] {
+  --canvas-bg: #ffffff;
+  --canvas-text: #1a1a1a;
+  --canvas-accent: #6366f1;
+  --canvas-card: #f8fafc;
+  --canvas-border: #e2e8f0;
+}
+
+/* Theme: Retro Sketchbook */
+[data-theme='retro-sketchbook'] {
+  --canvas-bg: #faf0e6;
+  --canvas-text: #3e2723;
+  --canvas-accent: #d4a373;
+  --canvas-card: #f5e6d3;
+  --canvas-border: #ddb892;
+}
+
+body {
+  margin: 0;
+  background-color: var(--canvas-bg);
+  color: var(--canvas-text);
+  min-height: 100dvh;
+}
+
+#root {
+  min-height: 100dvh;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+canvas {
+  touch-action: none;
+}
