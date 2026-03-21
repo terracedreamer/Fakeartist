@@ -1,8 +1,72 @@
-# Fake Artist — Game Design Blueprint
+# Fake Artist — Project CLAUDE.md
 
-> Complete game design blueprint · Ready to build
+> Game design blueprint + development conventions
 
 **Tags:** 3–16 Players · Web App · React + Node.js + Socket.io · AI Powered
+
+---
+
+## Project-Specific Overrides
+
+- **AI/LLM**: OpenAI API (`gpt-4o-mini`) — NOT Anthropic/Claude API. Uses `openai` npm package with `response_format: { type: 'json_object' }` for structured output.
+- **Hosting**: Coolify (self-hosted VPS) — NOT Vercel/Railway. Two separate Dockerfile services (backend + frontend).
+- **Coolify Dockerfile paths**: Base Directory = `/server` or `/client`, Dockerfile Location = `Dockerfile` (relative to base dir, NOT `/server/Dockerfile`).
+- **Frontend build args**: `VITE_BACKEND_URL` must be a Coolify **build argument**, not runtime env var.
+
+---
+
+## Routes
+
+| Path | Page | Purpose |
+|------|------|---------|
+| `/` | Landing | Marketing page — aurora hero, features, CTA |
+| `/play` | Home | Create/join room with username + avatar |
+| `/lobby/:code` | Lobby | Room settings, player list, QR code |
+| `/game/:code` | Game | Player drawing, voting, redemption |
+| `/host/:code` | HostCanvas | Shared TV/projector display |
+
+When navigating "back to home" from any page, use `/play` (not `/`).
+QR join URLs use `/play?join=CODE`.
+
+---
+
+## UI Architecture
+
+### Theme System
+4 themes via CSS custom properties on `[data-theme]` attribute (set in App.jsx from room settings, defaults to `clean-minimal`):
+- `clean-minimal` — White bg (#fff), indigo accent (#6366f1)
+- `dark-artsy` — Dark bg (#0f0f0f), purple accent (#a78bfa)
+- `bright-playful` — Yellow bg (#fef9c3), pink accent (#f472b6)
+- `retro-sketchbook` — Beige bg (#faf0e6), tan accent (#d4a373)
+
+Each theme has `--canvas-card-rgb` and `--canvas-accent-rgb` for glass effects with variable opacity.
+
+### Shared Components
+| Component | File | Purpose |
+|-----------|------|---------|
+| PageTransition | `components/PageTransition.jsx` | Wrap page return in this for enter/exit animations |
+| GlassCard | `components/GlassCard.jsx` | Backdrop-blur card. Use instead of plain `bg-canvas-card` divs |
+| AnimatedButton | `components/AnimatedButton.jsx` | Spring hover/tap. Variants: primary, secondary, danger, small, small-danger |
+| CountdownRing | `components/CountdownRing.jsx` | SVG circular timer. Props: seconds, remaining, size |
+| AnimatedCounter | `components/AnimatedCounter.jsx` | Animated number with +/- delta badges |
+| ConfirmModal | `components/ConfirmModal.jsx` | Glass-morphism confirmation dialog |
+
+### CSS Utilities (index.css)
+- `.glass-card` — backdrop-blur card
+- `.gradient-text` — accent-to-pink gradient text
+- `.glow` — accent color box-shadow
+- `.shimmer` — animated gradient highlight
+- `.pulse-glow` — pulsing box-shadow
+- `.aurora-bg` — animated gradient background
+- `.landing-hero` — Unsplash bg image via ::before at 0.05 opacity
+
+### Animation Conventions
+- Page transitions: `AnimatePresence mode="wait"` in App.jsx wrapping Routes
+- Each page wraps return in `<PageTransition>`
+- List items: stagger with `delay: index * 0.08`
+- Phase changes in Game/HostCanvas: `AnimatePresence mode="wait"` with keyed motion.divs
+- Buttons: use `AnimatedButton` component (not raw `<button>`)
+- Cards: use `GlassCard` component
 
 ---
 
@@ -42,15 +106,13 @@ The host screen acts as the **shared display canvas** — visible to everyone in
 
 ## Drawing Tools
 
-Every player has access to the following tools during their turn:
-
 | Tool | Description |
 |---|---|
 | Freehand drawing | Draw freely with finger or stylus |
-| Brush size options | Small, medium, and large brush sizes |
-| Color selection | Full color palette to choose from |
+| Brush size options | Small (2px), medium (4px), large (8px) |
+| Color selection | 10-color palette (black, red, orange, yellow, green, blue, purple, pink, white, gray) |
 | Undo last stroke | Remove your most recent stroke if needed |
-| Eraser tool | Erase specific parts of your stroke |
+| Eraser tool | Erase specific parts of your stroke (3x brush size) |
 
 ---
 
@@ -70,9 +132,7 @@ A mix of AI-generated and custom words each round:
 - **AI-generated** — OpenAI generates a word from a random category each round
 - **Custom** — Host can type their own word before the round starts
 - The word is shown secretly to all players **except the Fake Artist**
-
-### Word Categories (AI-generated)
-OpenAI dynamically generates categories and words each game — no two rounds are the same. Example categories include animals, food, landmarks, emotions, inventions, and more.
+- **Fallback** — If OpenAI API is unavailable, words come from built-in dictionary (animals, food, landmarks, objects, nature)
 
 ---
 
@@ -89,10 +149,10 @@ OpenAI dynamically generates categories and words each game — no two rounds ar
 ## Voting Phase
 
 ### Discussion First
-After drawing rounds end, all players can discuss openly — pointing out suspicious strokes, defending their own contributions, and accusing others.
+After drawing rounds end, all players can discuss openly. Discussion has a configurable countdown timer displayed as a visual CountdownRing.
 
 ### Simultaneous Vote
-After discussion, all players vote at the same time for who they think the Fake Artist is. The player with the most votes is revealed.
+After discussion, all players vote at the same time for who they think the Fake Artist is. **A confirmation modal prevents accidental votes.** The player with the most votes is revealed.
 
 ---
 
@@ -100,24 +160,21 @@ After discussion, all players vote at the same time for who they think the Fake 
 
 If the Fake Artist is caught (receives the most votes):
 - They are **not immediately eliminated**
-- They get **10 seconds** to think silently
-- After 10 seconds they must **guess the secret word**
+- A **10-second visual countdown ring** appears
+- They must **guess the secret word** before the timer expires
+- **Auto-submits** if timer reaches zero
 - If they guess correctly — **Fake Artist still wins**
 - If they guess wrong — **Artists win**
-
-This keeps the tension alive right until the very last second.
 
 ---
 
 ## Player Identity
 
-Players can identify themselves using any combination of:
-- **Username** — chosen at join screen
-- **Avatar** — selected from a preset library
-- **Custom artist character** — personalised scientist/artist persona
-- **Photo upload** — upload your own profile photo
+Players can identify themselves using:
+- **Username** — chosen at join screen (max 20 characters)
+- **Avatar** — selected from 8 presets (artist, detective, wizard, ninja, robot, alien, pirate, astronaut)
 
-All identity elements are displayed on player cards, voting screens, and the leaderboard.
+**Not yet implemented:** Custom artist character, photo upload.
 
 ---
 
@@ -128,33 +185,32 @@ All identity elements are displayed on player cards, voting screens, and the lea
 | Correctly identifying the Fake Artist | + points for each voter who got it right |
 | Fake Artist surviving undetected | + bonus points for the Fake Artist |
 | Fake Artist guessing the word correctly after being caught | + redemption bonus |
-| Finishing your drawing stroke fastest | + speed bonus |
 | Wrong accusation (voting out an innocent player) | - penalty points |
+
+Score changes are displayed with animated +/- delta indicators.
+
+**Not yet implemented:** Speed bonus for fastest drawer.
 
 ---
 
 ## Visual Styles
 
-The host can select a visual theme before each game. Available styles:
-
-| Style | Vibe |
-|---|---|
-| Dark & artsy | Moody, gallery vibes — dark backgrounds, muted palette |
-| Bright & playful | Colourful, cartoonish — fun and energetic |
-| Clean & minimal | White canvas, studio feel — pure and distraction-free |
-| Retro sketchbook | Paper texture, hand-drawn feel — warm and nostalgic |
+| Style | Theme Key | Vibe |
+|---|---|---|
+| Dark & artsy | `dark-artsy` | Moody, gallery vibes — dark backgrounds, muted palette |
+| Bright & playful | `bright-playful` | Colourful, cartoonish — fun and energetic |
+| Clean & minimal | `clean-minimal` | White canvas, studio feel — pure and distraction-free (default) |
+| Retro sketchbook | `retro-sketchbook` | Paper texture, hand-drawn feel — warm and nostalgic |
 
 ---
 
 ## AI-Powered Features (OpenAI API)
 
 ### Word Category Generation
-OpenAI (GPT-4o-mini) dynamically generates fresh word categories and words every round — ensuring no two games feel the same. Categories scale in difficulty based on host settings.
+OpenAI (GPT-4o-mini) dynamically generates fresh word categories and words every round using `response_format: { type: 'json_object' }`. Falls back to built-in dictionary if API is unavailable.
 
 ### Post-Round Analysis
-After each round, OpenAI generates a fun art-critic-style breakdown of who drew what — calling out suspicious strokes, praising bold moves, and building tension before the vote.
-
-*Example: "Player 3's contribution was... bold. Almost too bold for someone who knew what they were drawing. Meanwhile Player 1's timid little squiggle in the corner raises questions."*
+After each round, OpenAI generates a fun art-critic-style breakdown of who drew what — calling out suspicious strokes, praising bold moves, and building tension before the vote. Toggleable in game settings.
 
 ---
 
@@ -167,9 +223,10 @@ After each round, OpenAI generates a fun art-critic-style breakdown of who drew 
 
 ### Pre-Game Settings
 - Set a custom word for the round
-- Choose number of drawing rounds per game
+- Choose number of drawing rounds per game (1–10)
+- Set drawing turns per round (1–5)
 - Select visual style / theme
-- Set discussion timer length
+- Set discussion timer length (15–300 seconds)
 - Toggle AI post-round analysis on or off
 
 ---
@@ -178,28 +235,37 @@ After each round, OpenAI generates a fun art-critic-style breakdown of who drew 
 
 | Layer | Technology |
 |---|---|
-| Frontend | React + Tailwind CSS |
+| Frontend | React 18 + Vite + Tailwind CSS |
+| State | Zustand |
+| Animations | Framer Motion |
+| Icons | Lucide React |
 | Backend | Node.js + Express |
 | Real-time | Socket.io |
-| AI engine | OpenAI API (GPT-4o-mini) |
+| Database | MongoDB (Mongoose) — 24hr TTL on rooms |
+| AI engine | OpenAI API (gpt-4o-mini) via `openai` npm package |
 | Canvas rendering | HTML5 Canvas API |
-| QR codes | qrcode.react library |
-| Frontend hosting | Vercel |
-| Backend hosting | Railway |
+| QR codes | qrcode.react |
+| Hosting | Coolify (self-hosted VPS) — 2 Dockerfile services |
 
 ---
 
-## Suggested Build Order
+## Key Implementation Details
 
-| Week | Focus |
-|---|---|
-| Week 1 | Set up React + Node.js + Socket.io, build room creation with code and QR joining |
-| Week 2 | Build the shared canvas system — strokes drawn on phones appear on host screen in real time |
-| Week 3 | Add drawing tools (brush size, color, undo, eraser), turn order, and continuous line mechanic |
-| Week 4 | Build word system, voting phase, discussion timer, and Fake Artist redemption mechanic |
-| Week 5 | Plug in OpenAI API for word generation and post-round analysis |
-| Week 6 | Add scoring, leaderboards, player identity system, visual themes, and host controls |
+### Socket Events Flow
+1. `create-room` / `join-room` → Room.code + playerId returned
+2. `start-game` → status='playing'
+3. `start-round` → fakeArtistId assigned, word/category sent (real artists only)
+4. `draw-stroke` → stroke broadcasted to all, turn incremented
+5. `discussion-phase` → AI analysis + timer
+6. `submit-vote` → collected until all voted, results broadcast
+7. `redemption-guess` (if fake artist caught) → 10-second window with auto-submit
+8. `game-over` → final leaderboard
 
----
+### Database Schema
+- **Room**: code (unique), players[], rounds[], settings, currentRound, currentTurnIndex, currentDrawingRound, status, TTL (24hr)
+- **Player**: socketId, username, avatar, photoUrl, score, isHost, isConnected
+- **Round**: roundNumber, word, wordSource, fakeArtistId, strokes[], votes, caughtPlayerId, redemptionGuess/Correct, aiAnalysis, status
+- **Stroke**: playerId, points[], color, brushSize, round, timestamp
 
-*Blueprint generated with Claude · Ready to build*
+### No Auth System
+Players are ephemeral (socket-based identity). Rooms auto-expire after 24 hours via MongoDB TTL index.
