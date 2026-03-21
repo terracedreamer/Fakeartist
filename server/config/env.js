@@ -1,7 +1,7 @@
 const logger = require('../utils/logger');
 
 const requiredVars = ['MONGODB_URI', 'DB_NAME'];
-const optionalVars = ['ANTHROPIC_API_KEY', 'CLIENT_URL'];
+const optionalVars = ['OPENAI_API_KEY', 'CLIENT_URL'];
 
 const validateEnv = () => {
   const missing = requiredVars.filter((v) => !process.env[v]);

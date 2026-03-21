@@ -67,12 +67,12 @@ Every player has access to the following tools during their turn:
 
 ### How Words Are Chosen
 A mix of AI-generated and custom words each round:
-- **AI-generated** — Claude generates a word from a random category each round
+- **AI-generated** — OpenAI generates a word from a random category each round
 - **Custom** — Host can type their own word before the round starts
 - The word is shown secretly to all players **except the Fake Artist**
 
 ### Word Categories (AI-generated)
-Claude dynamically generates categories and words each game — no two rounds are the same. Example categories include animals, food, landmarks, emotions, inventions, and more.
+OpenAI dynamically generates categories and words each game — no two rounds are the same. Example categories include animals, food, landmarks, emotions, inventions, and more.
 
 ---
 
@@ -146,13 +146,13 @@ The host can select a visual theme before each game. Available styles:
 
 ---
 
-## AI-Powered Features (Claude API)
+## AI-Powered Features (OpenAI API)
 
 ### Word Category Generation
-Claude dynamically generates fresh word categories and words every round — ensuring no two games feel the same. Categories scale in difficulty based on host settings.
+OpenAI (GPT-4o-mini) dynamically generates fresh word categories and words every round — ensuring no two games feel the same. Categories scale in difficulty based on host settings.
 
 ### Post-Round Analysis
-After each round, Claude generates a fun art-critic-style breakdown of who drew what — calling out suspicious strokes, praising bold moves, and building tension before the vote.
+After each round, OpenAI generates a fun art-critic-style breakdown of who drew what — calling out suspicious strokes, praising bold moves, and building tension before the vote.
 
 *Example: "Player 3's contribution was... bold. Almost too bold for someone who knew what they were drawing. Meanwhile Player 1's timid little squiggle in the corner raises questions."*
 
@@ -181,7 +181,7 @@ After each round, Claude generates a fun art-critic-style breakdown of who drew 
 | Frontend | React + Tailwind CSS |
 | Backend | Node.js + Express |
 | Real-time | Socket.io |
-| AI engine | Claude API (Anthropic) |
+| AI engine | OpenAI API (GPT-4o-mini) |
 | Canvas rendering | HTML5 Canvas API |
 | QR codes | qrcode.react library |
 | Frontend hosting | Vercel |
@@ -197,7 +197,7 @@ After each round, Claude generates a fun art-critic-style breakdown of who drew 
 | Week 2 | Build the shared canvas system — strokes drawn on phones appear on host screen in real time |
 | Week 3 | Add drawing tools (brush size, color, undo, eraser), turn order, and continuous line mechanic |
 | Week 4 | Build word system, voting phase, discussion timer, and Fake Artist redemption mechanic |
-| Week 5 | Plug in Claude API for word generation and post-round analysis |
+| Week 5 | Plug in OpenAI API for word generation and post-round analysis |
 | Week 6 | Add scoring, leaderboards, player identity system, visual themes, and host controls |
 
 ---

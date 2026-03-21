@@ -9,7 +9,7 @@
 - Coolify instance running on your VPS
 - Domain or subdomain pointed to your VPS (e.g. `fakeartist-api.magicbusstudios.com` + `fakeartist.magicbusstudios.com`)
 - MongoDB cluster accessible from the VPS
-- Anthropic API key for Claude AI features
+- OpenAI API key for AI features
 
 ---
 
@@ -42,11 +42,11 @@ PORT=3001
 NODE_ENV=production
 MONGODB_URI=mongodb+srv://<user>:<password>@<cluster>.mongodb.net
 DB_NAME=fakeartist
-ANTHROPIC_API_KEY=sk-ant-your-key-here
+OPENAI_API_KEY=sk-your-key-here
 CLIENT_URL=https://fakeartist.magicbusstudios.com
 ```
 
-> Replace with your actual MongoDB connection string and Anthropic key.
+> Replace with your actual MongoDB connection string and OpenAI key.
 > `CLIENT_URL` must match your frontend domain exactly (for CORS).
 
 ### 2c. Domain & SSL
@@ -155,7 +155,7 @@ Run through this flow after every deployment:
 | `NODE_ENV` | Yes | `production` |
 | `MONGODB_URI` | Yes | MongoDB connection string |
 | `DB_NAME` | Yes | Database name (`fakeartist`) |
-| `ANTHROPIC_API_KEY` | No | Claude API key (AI features disabled without it) |
+| `OPENAI_API_KEY` | No | OpenAI API key (AI features disabled without it) |
 | `CLIENT_URL` | Yes | Frontend URL for CORS (e.g. `https://fakeartist.magicbusstudios.com`) |
 
 ### Frontend (Build Argument)
@@ -192,8 +192,8 @@ Run through this flow after every deployment:
 2. Make sure your MongoDB cluster allows connections from your VPS IP (check Atlas Network Access or firewall rules)
 3. Check container logs in Coolify for the exact error
 
-### Claude API not working (words fall back to defaults)
-1. Check `ANTHROPIC_API_KEY` is set correctly in backend env vars
+### OpenAI API not working (words fall back to defaults)
+1. Check `OPENAI_API_KEY` is set correctly in backend env vars
 2. Check container logs for "AI word generation failed" messages
 3. The game works without the API key — it uses fallback word lists
 
@@ -239,7 +239,7 @@ attrib -U +P .git /S /D
 │                     │       │                      │
 │  React SPA          │       │  Express + Socket.io │
 │  Tailwind CSS       │       │  Mongoose            │
-│  Socket.io Client   │       │  Claude API          │
+│  Socket.io Client   │       │  OpenAI API          │
 └─────────────────────┘       └──────────┬───────────┘
                                          │
                                          ▼

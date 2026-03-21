@@ -1,16 +1,16 @@
-const Anthropic = require('@anthropic-ai/sdk');
+const OpenAI = require('openai');
 const logger = require('../utils/logger');
 
 let client = null;
 
 const getClient = () => {
   if (!client) {
-    const apiKey = process.env.ANTHROPIC_API_KEY;
+    const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) {
-      logger.warn('ANTHROPIC_API_KEY not set — AI features disabled');
+      logger.warn('OPENAI_API_KEY not set — AI features disabled');
       return null;
     }
-    client = new Anthropic({ apiKey });
+    client = new OpenAI({ apiKey });
   }
   return client;
 };
@@ -24,16 +24,21 @@ const FALLBACK_WORDS = {
 };
 
 const generateWord = async (difficulty = 'medium') => {
-  const anthropic = getClient();
-  if (!anthropic) {
+  const openai = getClient();
+  if (!openai) {
     return getFallbackWord();
   }
 
   try {
-    const message = await anthropic.messages.create({
-      model: 'claude-sonnet-4-20250514',
+    const response = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
       max_tokens: 200,
+      response_format: { type: 'json_object' },
       messages: [
+        {
+          role: 'system',
+          content: 'You generate words for a drawing game. Always respond with valid JSON.',
+        },
         {
           role: 'user',
           content: `Generate a single word or short phrase (max 2 words) for a drawing game. Difficulty: ${difficulty}.
@@ -43,7 +48,7 @@ The word should be something that can be drawn. Be creative with categories.`,
       ],
     });
 
-    const text = message.content[0].text.trim();
+    const text = response.choices[0].message.content.trim();
     const parsed = JSON.parse(text);
     return { word: parsed.word.toLowerCase(), category: parsed.category, source: 'ai' };
   } catch (error) {
@@ -61,8 +66,8 @@ const getFallbackWord = () => {
 };
 
 const generatePostRoundAnalysis = async (strokes, players, word, fakeArtistId) => {
-  const anthropic = getClient();
-  if (!anthropic) {
+  const openai = getClient();
+  if (!openai) {
     return null;
   }
 
@@ -75,13 +80,18 @@ const generatePostRoundAnalysis = async (strokes, players, word, fakeArtistId) =
       return `${p.username}: ${playerStrokes.length} strokes, ${isFake ? '(FAKE ARTIST)' : '(real artist)'}`;
     });
 
-    const message = await anthropic.messages.create({
-      model: 'claude-sonnet-4-20250514',
+    const response = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
       max_tokens: 300,
+      response_format: { type: 'json_object' },
       messages: [
         {
+          role: 'system',
+          content: 'You are a dramatic art critic commentating on a drawing game. Always respond with valid JSON.',
+        },
+        {
           role: 'user',
-          content: `You're a dramatic art critic commentating on a drawing game round. The secret word was "${word}".
+          content: `The secret word was "${word}".
 Players and their contributions:
 ${playerSummaries.join('\n')}
 
@@ -91,7 +101,7 @@ Return ONLY valid JSON: {"analysis": "your analysis text"}`,
       ],
     });
 
-    const text = message.content[0].text.trim();
+    const text = response.choices[0].message.content.trim();
     const parsed = JSON.parse(text);
     return parsed.analysis;
   } catch (error) {
