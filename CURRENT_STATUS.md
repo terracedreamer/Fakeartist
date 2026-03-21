@@ -21,7 +21,8 @@
 
 - **Repo**: https://github.com/terracedreamer/Fakeartist
 - **Branch**: `main`
-- **Total commits**: 5
+- **Total commits**: 7
+- **Last commit**: `959870d` — `docs: update project CLAUDE.md with session learnings`
 
 ---
 
