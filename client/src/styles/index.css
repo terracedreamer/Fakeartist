@@ -8,6 +8,8 @@
   --canvas-accent: #6366f1;
   --canvas-card: #f8fafc;
   --canvas-border: #e2e8f0;
+  --canvas-card-rgb: 248, 250, 252;
+  --canvas-accent-rgb: 99, 102, 241;
   font-family: 'Inter', system-ui, sans-serif;
 }
 
@@ -18,6 +20,8 @@
   --canvas-accent: #a78bfa;
   --canvas-card: #1a1a2e;
   --canvas-border: #2d2d44;
+  --canvas-card-rgb: 26, 26, 46;
+  --canvas-accent-rgb: 167, 139, 250;
 }
 
 /* Theme: Bright & Playful */
@@ -27,6 +31,8 @@
   --canvas-accent: #f472b6;
   --canvas-card: #fefce8;
   --canvas-border: #fde68a;
+  --canvas-card-rgb: 254, 252, 232;
+  --canvas-accent-rgb: 244, 114, 182;
 }
 
 /* Theme: Clean & Minimal */
@@ -36,6 +42,8 @@
   --canvas-accent: #6366f1;
   --canvas-card: #f8fafc;
   --canvas-border: #e2e8f0;
+  --canvas-card-rgb: 248, 250, 252;
+  --canvas-accent-rgb: 99, 102, 241;
 }
 
 /* Theme: Retro Sketchbook */
@@ -45,7 +53,113 @@
   --canvas-accent: #d4a373;
   --canvas-card: #f5e6d3;
   --canvas-border: #ddb892;
+  --canvas-card-rgb: 245, 230, 211;
+  --canvas-accent-rgb: 212, 163, 115;
 }
+
+/* ===== Utility Classes ===== */
+
+.glass-card {
+  background: rgba(var(--canvas-card-rgb), 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--canvas-border);
+  border-radius: 1rem;
+}
+
+.gradient-text {
+  background: linear-gradient(
+    135deg,
+    var(--canvas-accent),
+    color-mix(in srgb, var(--canvas-accent) 60%, #f472b6)
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.glow {
+  box-shadow: 0 0 24px rgba(var(--canvas-accent-rgb), 0.25);
+}
+
+/* Landing hero background */
+.landing-hero {
+  position: relative;
+  overflow: hidden;
+}
+
+.landing-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url('https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=1200&q=80');
+  background-size: cover;
+  background-position: center;
+  opacity: 0.05;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ===== Keyframes ===== */
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(var(--canvas-accent-rgb), 0.08) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2.5s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 8px rgba(var(--canvas-accent-rgb), 0.2);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(var(--canvas-accent-rgb), 0.5);
+  }
+}
+
+.pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+@keyframes aurora {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.aurora-bg {
+  background: linear-gradient(
+    -45deg,
+    var(--canvas-bg),
+    color-mix(in srgb, var(--canvas-accent) 15%, var(--canvas-bg)),
+    var(--canvas-bg),
+    color-mix(in srgb, var(--canvas-accent) 10%, var(--canvas-bg))
+  );
+  background-size: 400% 400%;
+  animation: aurora 12s ease infinite;
+}
+
+/* ===== Base Styles ===== */
 
 body {
   margin: 0;
@@ -64,4 +178,28 @@ body {
 
 canvas {
   touch-action: none;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--canvas-border);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--canvas-accent);
+}
+
+/* Selection */
+::selection {
+  background: rgba(var(--canvas-accent-rgb), 0.25);
+  color: var(--canvas-text);
 }
