@@ -2,25 +2,51 @@
 
 ---
 
-## 2026-03-20 — Initial Build
+## 2026-03-21 — OpenAI Switch + Premium UI Overhaul (Session 2)
+
+### Changed
+- **Switched AI provider from Anthropic (Claude) to OpenAI (GPT-4o-mini)**
+- `server/services/aiService.js` — Rewrote to use OpenAI SDK with `response_format: { type: 'json_object' }`
+- `server/package.json` — Replaced `@anthropic-ai/sdk` with `openai`
+- `server/config/env.js` — `ANTHROPIC_API_KEY` → `OPENAI_API_KEY`
+- `.env.example` — Updated API key placeholder
+- `CLAUDE.md` — Updated all AI references
+- `DEPLOYMENT.md` — Updated env vars, troubleshooting, architecture diagram
+
+### Added — Premium UI
+- **Landing page** (`Landing.jsx`) — Aurora gradient hero with Unsplash bg, "How to Play" (4 scroll-triggered step cards), Features grid, footer CTA
+- **7 shared components**: PageTransition, GlassCard, AnimatedButton, CountdownRing, AnimatedCounter, ConfirmModal
+- **CSS utilities**: glass-card (backdrop-blur), gradient-text, glow, shimmer, aurora-bg, pulse-glow, landing-hero bg, custom scrollbar, selection colors
+- **RGB theme vars** (`--canvas-card-rgb`, `--canvas-accent-rgb`) for all 4 themes
+- **Page transitions** via AnimatePresence in App.jsx
+- **Route restructure**: `/` → Landing, `/play` → Home (create/join)
+
+### Added — Gameplay Enhancements
+- **Redemption countdown** — 10-second CountdownRing with auto-submit on timeout
+- **Vote confirmation** — ConfirmModal prevents accidental taps
+- **Animated score deltas** — AnimatedCounter shows +/- badges on score changes
+- **Visual discussion timer** — CountdownRing replaces plain text timer
+
+### Enhanced — All Pages
+- **Home**: GlassCard form, animated avatar selection, gradient text, AnimatePresence mode transitions
+- **Lobby**: Staggered player list entries, pulsing "waiting" text, glow QR code, animated settings expand/collapse, AnimatedCounter player count
+- **Game**: Phase transition animations (fade/scale), staggered game-over leaderboard, spring animation on 1st place
+- **HostCanvas**: Turn pop animation, layoutId sliding turn indicator, animated phase overlays, staggered leaderboard
+
+---
+
+## 2026-03-20 — Initial Build (Session 1)
+
+### Commits
+1. `e6f3a2d` — `feat: initial project scaffolding with full game implementation`
+2. `e243d5b` — `docs: add Coolify deployment guide`
+3. `a2a8f68` — `docs: add session handoff, changelog, status, and future work`
 
 ### Added
-- **Project scaffolding**: Folder structure, package.json files for server and client, .gitignore, .env.example
-- **Backend**: Express server with Socket.io, MongoDB (Mongoose), Winston logger, Helmet, CORS, rate limiting, health/metrics endpoints
-- **Room model**: Mongoose schema with players, rounds, strokes, votes, settings, TTL auto-cleanup
-- **Game service**: Full game logic — room create/join, round start, stroke tracking, voting, redemption, scoring
-- **AI service**: Claude API integration for dynamic word/category generation and post-round art-critic analysis, with fallback word dictionary
-- **Socket handlers**: All real-time events — room management, drawing sync, turn advancement, voting, redemption, host controls (kick, transfer, pause, settings)
-- **Frontend**: React + Vite + Tailwind CSS with Zustand state management
-- **Home page**: Create/join room flow with username input and avatar selection (8 presets)
-- **Lobby page**: Room code display, QR code generation, player list with host controls, game settings panel (rounds, drawing turns, discussion timer, theme, AI analysis toggle)
-- **Game page**: Full player view with phases — waiting, drawing, discussion (with countdown timer), voting, redemption, results, game over with leaderboard
-- **Host canvas page**: Shared display canvas for TV/projector showing all strokes in real-time, turn indicators, vote results overlay
-- **Drawing canvas component**: Touch + mouse input, freehand drawing, 3 brush sizes, 10 colors, eraser tool, undo
-- **Host canvas display component**: Read-only canvas that renders all synced strokes
-- **4 visual themes**: Dark & Artsy, Bright & Playful, Clean & Minimal, Retro Sketchbook (CSS custom properties)
-- **Scoring system**: Points for correct votes, penalty for wrong votes, Fake Artist survival bonus, redemption bonus
-- **Dockerfiles**: Backend (Node.js Alpine), Frontend (multi-stage Vite build → Nginx Alpine)
-- **Nginx config**: SPA catch-all with gzip and asset caching
-- **Deployment guide**: Full Coolify deployment instructions with env var reference, WebSocket config, verification checklist, troubleshooting, architecture diagram
-- **Git repo**: Initialized and pushed to https://github.com/terracedreamer/Fakeartist
+- **Project scaffolding**: Folder structure, package.json for server and client, .gitignore, .env.example
+- **Backend (11 source files)**: Express server with Socket.io, MongoDB (Mongoose), Winston logger, Helmet, CORS, rate limiting, health/metrics endpoints, room model with TTL, full game service, AI service with fallback dictionary, socket handlers
+- **Frontend (17 source files)**: React + Vite + Tailwind CSS + Zustand state management, 4 pages (Home, Lobby, Game, HostCanvas), 2 components (DrawingCanvas, HostCanvasDisplay), socket client + hook
+- **Game features**: Room create/join via code + QR, 8 avatar presets, configurable settings, real-time drawing sync, discussion phase with countdown, simultaneous voting, Fake Artist redemption, scoring with penalties
+- **4 visual themes**: Dark & Artsy, Bright & Playful, Clean & Minimal, Retro Sketchbook
+- **Dockerfiles**: Backend + Frontend multi-stage builds
+- **DEPLOYMENT.md**: Full Coolify deployment guide

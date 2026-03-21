@@ -1,6 +1,6 @@
 # Current Status — Fake Artist
 
-> Last updated: 2026-03-20
+> Last updated: 2026-03-21 (Session 2)
 
 ---
 
@@ -8,11 +8,12 @@
 
 | Component | Status | Notes |
 |-----------|--------|-------|
-| Backend | Built, not deployed | Ready for Coolify |
-| Frontend | Built, not deployed | Ready for Coolify |
+| Backend | Built, not deployed | 11 source files, ready for Coolify |
+| Frontend | Built, not deployed | 24 source files (17 original + 7 new components/pages), build verified |
 | MongoDB | Not configured | Needs connection string in `.env` |
-| Claude API | Not configured | Needs API key in `.env`; game works without it (fallback words) |
-| Socket.io | Implemented | Needs end-to-end testing |
+| OpenAI API | Not configured | Needs `OPENAI_API_KEY` in `.env`; game works without it (fallback words) |
+| Socket.io | Implemented | Needs end-to-end testing with multiple clients |
+| Docker | Dockerfiles ready | Backend: Node.js Alpine, Frontend: multi-stage Vite → Nginx Alpine |
 
 ---
 
@@ -20,23 +21,37 @@
 
 - **Repo**: https://github.com/terracedreamer/Fakeartist
 - **Branch**: `main`
-- **Last commit**: `docs: add Coolify deployment guide`
-- **Total commits**: 2
+- **Total commits**: 5
 
 ---
 
 ## Known Issues
 
-1. **Not tested end-to-end yet** — App was built in one session, needs local testing with MongoDB running
-2. **No reconnection handling** — If a player's socket disconnects mid-game, they're removed from the room. No rejoin mechanism yet.
-3. **No photo upload** — Player identity system supports avatar presets only. Photo upload mentioned in spec but not implemented.
-4. **No input sanitization on drawing data** — Stroke points are accepted as-is from clients. Should validate point coordinates are within canvas bounds.
-5. **No speed bonus scoring** — Spec mentions speed bonus for fastest drawer, not implemented yet.
-6. **Host canvas shares same socket** — HostCanvas page uses the same Zustand store, which works when opened in a new tab from the same browser session. Opening from a different browser would need its own socket connection to the room.
+1. **Not tested end-to-end yet** — Needs local testing with MongoDB and 3+ browser tabs
+2. **No reconnection handling** — Socket disconnect removes player. No rejoin mechanism.
+3. **No photo upload** — 8 avatar presets only.
+4. **No input sanitization on drawing data** — Stroke points not validated for bounds.
+5. **No speed bonus scoring** — Mentioned in spec, not implemented.
+6. **Host canvas shares same socket** — Works in new tab from same browser only.
+7. **Fixed canvas size** — 400x400 player, 800x600 host. No coordinate normalization.
+8. **Discussion timer desync** — Client-side setInterval, should be server-authoritative.
+9. **No socket event throttling** — Only HTTP routes are rate-limited.
 
 ---
 
-## Environment Variables Needed
+## Routes
+
+| Path | Page | Purpose |
+|------|------|---------|
+| `/` | Landing | Marketing page with hero, features, CTA |
+| `/play` | Home | Create/join room with username + avatar |
+| `/lobby/:code` | Lobby | Room settings, player list, QR code |
+| `/game/:code` | Game | Player drawing, voting, redemption |
+| `/host/:code` | HostCanvas | Shared TV/projector display |
+
+---
+
+## Environment Variables
 
 ### Backend (.env)
 ```
@@ -44,48 +59,74 @@ PORT=3001
 NODE_ENV=development
 MONGODB_URI=mongodb+srv://...
 DB_NAME=fakeartist
-ANTHROPIC_API_KEY=sk-ant-...
+OPENAI_API_KEY=sk-...
 CLIENT_URL=http://localhost:5173
 ```
 
-### Frontend (Vite)
+### Frontend (.env)
 ```
 VITE_BACKEND_URL=http://localhost:3001
 ```
 
+> In Coolify: `VITE_BACKEND_URL` must be a **build argument**, not runtime env var.
+
 ---
 
-## File Inventory (35 files)
+## Dependencies
 
-### Server (14 files)
-- `server/server.js` — Entry point
-- `server/config/db.js` — MongoDB connection
-- `server/config/env.js` — Env validation
-- `server/models/Room.js` — Room/Player/Round/Stroke schemas
-- `server/services/gameService.js` — Game logic
-- `server/services/aiService.js` — Claude API service
-- `server/sockets/gameSocket.js` — Socket.io handlers
-- `server/routes/health.js` — Health endpoints
+### Server
+express, socket.io, mongoose, openai, cors, helmet, morgan, express-rate-limit, winston, dotenv, express-validator, uuid
+
+### Client
+react, react-dom, react-router-dom, socket.io-client, zustand, axios, framer-motion, lucide-react, qrcode.react, sonner, react-helmet-async
+**Dev**: vite, @vitejs/plugin-react, tailwindcss, postcss, autoprefixer
+
+---
+
+## File Inventory (35 source files + 8 root files)
+
+### Server (11 source files)
+- `server/server.js` — Express entry point with Socket.io setup
+- `server/config/db.js` — MongoDB connection via Mongoose
+- `server/config/env.js` — Env validation (OPENAI_API_KEY)
+- `server/models/Room.js` — Room/Player/Round/Stroke schemas (24hr TTL)
+- `server/services/gameService.js` — All game logic
+- `server/services/aiService.js` — OpenAI API service (gpt-4o-mini + fallback)
+- `server/sockets/gameSocket.js` — Socket.io event handlers
+- `server/routes/health.js` — /health and /metrics
 - `server/utils/logger.js` — Winston logger
-- `server/package.json` + `server/package-lock.json`
-- `server/Dockerfile`
+- `server/package.json`, `server/Dockerfile`
 
-### Client (20 files)
-- `client/src/main.jsx` — React entry
-- `client/src/App.jsx` — Router + theme
-- `client/src/stores/gameStore.js` — Zustand store
-- `client/src/services/socket.js` — Socket.io client
-- `client/src/hooks/useSocket.js` — Socket event hook
-- `client/src/pages/Home.jsx` — Join/create
-- `client/src/pages/Lobby.jsx` — Room lobby
-- `client/src/pages/Game.jsx` — Player game view
-- `client/src/pages/HostCanvas.jsx` — Shared display
-- `client/src/components/DrawingCanvas.jsx` — Drawing input
-- `client/src/components/HostCanvasDisplay.jsx` — Display canvas
-- `client/src/styles/index.css` — Tailwind + themes
-- `client/index.html`, `client/vite.config.js`, `client/tailwind.config.js`, `client/postcss.config.js`
-- `client/package.json` + `client/package-lock.json`
-- `client/Dockerfile`, `client/nginx.conf`
+### Client (24 source files)
+**Pages (5):**
+- `Landing.jsx` — Marketing page with aurora hero, features, CTA
+- `Home.jsx` — Create/join with animated avatars, GlassCard
+- `Lobby.jsx` — Staggered player list, glow QR, animated settings
+- `Game.jsx` — Phase transitions, countdown rings, vote confirm, animated scores
+- `HostCanvas.jsx` — Turn animations, staggered leaderboard
 
-### Root
-- `.env.example`, `.gitignore`, `CLAUDE.md`, `DEPLOYMENT.md`
+**Components (8):**
+- `DrawingCanvas.jsx` — Touch/mouse drawing input
+- `HostCanvasDisplay.jsx` — Read-only display canvas
+- `PageTransition.jsx` — Page enter/exit animation wrapper
+- `GlassCard.jsx` — Glass-morphism card
+- `AnimatedButton.jsx` — Spring hover/tap button
+- `CountdownRing.jsx` — SVG circular countdown timer
+- `AnimatedCounter.jsx` — Animated number with deltas
+- `ConfirmModal.jsx` — Confirmation modal
+
+**Core:**
+- `App.jsx` — Router + AnimatePresence + theme
+- `main.jsx` — React entry with providers
+- `stores/gameStore.js` — Zustand store
+- `services/socket.js` — Socket.io client
+- `hooks/useSocket.js` — Socket event hook
+- `styles/index.css` — Tailwind + themes + utilities
+
+**Config:**
+- `index.html`, `vite.config.js`, `tailwind.config.js`, `postcss.config.js`
+- `package.json`, `Dockerfile`, `nginx.conf`
+
+### Root (8 files)
+- `.env.example`, `.gitignore`, `Claude.md`
+- `DEPLOYMENT.md`, `SESSION_HANDOFF.md`, `CHANGELOG.md`, `CURRENT_STATUS.md`, `FUTURE_WORK_TODO.md`
