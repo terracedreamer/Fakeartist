@@ -88,7 +88,7 @@ const useSocket = () => {
 
     socket.on('kicked', () => {
       resetGame();
-      navigate('/');
+      navigate('/play');
     });
 
     socket.on('game-paused', () => {

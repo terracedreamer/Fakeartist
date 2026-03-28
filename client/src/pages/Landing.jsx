@@ -11,9 +11,13 @@ import {
   Trophy,
   ArrowRight,
   Pencil,
+  LogIn,
+  LogOut,
+  User,
 } from 'lucide-react';
 import AnimatedButton from '../components/AnimatedButton';
 import GlassCard from '../components/GlassCard';
+import useAuthStore from '../stores/authStore';
 
 const steps = [
   {
@@ -75,6 +79,7 @@ const itemVariants = {
 
 export default function Landing() {
   const navigate = useNavigate();
+  const { isAuthenticated, user, login, logout } = useAuthStore();
 
   return (
     <>
@@ -87,6 +92,32 @@ export default function Landing() {
       </Helmet>
 
       <div className="min-h-screen">
+        {/* ===== Auth Header ===== */}
+        <div className="fixed top-0 right-0 z-50 p-4 flex items-center gap-3">
+          {isAuthenticated ? (
+            <>
+              <span className="text-sm text-canvas-text/60 hidden sm:inline">
+                {user?.name || user?.email}
+              </span>
+              <button
+                onClick={logout}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium bg-canvas-card/80 backdrop-blur border border-canvas-border hover:border-canvas-accent/50 transition"
+              >
+                <LogOut className="w-4 h-4" />
+                Logout
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={login}
+              className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium bg-canvas-accent text-white hover:opacity-90 transition"
+            >
+              <LogIn className="w-4 h-4" />
+              Sign In
+            </button>
+          )}
+        </div>
+
         {/* ===== Hero ===== */}
         <section className="landing-hero aurora-bg min-h-screen flex flex-col items-center justify-center px-4 text-center relative">
           <div className="relative z-10 max-w-3xl mx-auto">

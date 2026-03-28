@@ -12,6 +12,7 @@ const connectDB = require('./config/db');
 const validateEnv = require('./config/env');
 const logger = require('./utils/logger');
 const healthRoutes = require('./routes/health');
+const entitlementRoutes = require('./routes/entitlement');
 const registerGameSocket = require('./sockets/gameSocket');
 
 validateEnv();
@@ -42,6 +43,7 @@ const limiter = rateLimit({
 app.use('/api/', limiter);
 
 app.use('/', healthRoutes);
+app.use('/api', entitlementRoutes);
 
 registerGameSocket(io);
 

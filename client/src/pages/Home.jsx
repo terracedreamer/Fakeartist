@@ -3,9 +3,10 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Paintbrush, Users, Sparkles, ArrowLeft } from 'lucide-react';
+import { Paintbrush, Users, Sparkles, ArrowLeft, LogIn } from 'lucide-react';
 import socket from '../services/socket';
 import useGameStore from '../stores/gameStore';
+import useAuthStore from '../stores/authStore';
 import PageTransition from '../components/PageTransition';
 import GlassCard from '../components/GlassCard';
 import AnimatedButton from '../components/AnimatedButton';
@@ -17,8 +18,10 @@ export default function Home() {
   const [searchParams] = useSearchParams();
   const setPlayer = useGameStore((s) => s.setPlayer);
   const setRoom = useGameStore((s) => s.setRoom);
+  const { isAuthenticated, user, login } = useAuthStore();
 
-  const [username, setUsername] = useState('');
+  // Pre-fill username from MBS Platform profile if logged in
+  const [username, setUsername] = useState(user?.name || '');
   const [avatar, setAvatar] = useState('artist');
   const [joinCode, setJoinCode] = useState(searchParams.get('join') || '');
   const [mode, setMode] = useState(searchParams.get('join') ? 'join' : null);
