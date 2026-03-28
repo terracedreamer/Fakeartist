@@ -1,13 +1,14 @@
 # Future Work — Fake Artist
 
-> Organized by priority · Last updated: 2026-03-21
+> Organized by priority · Last updated: 2026-03-28
 
 ---
 
-## High Priority (Before First Deploy)
+## High Priority (Immediate)
 
+- [ ] **Activate SSO in Coolify** — Add JWT_SECRET, PLATFORM_URL, PRODUCT_SLUG to backend env vars, add domain to MBS Platform CORS_ORIGINS, redeploy both services
+- [ ] **Verify SSO flow** — Sign In → platform login → redirect back with token → Sign In button becomes username + Logout
 - [ ] **Local end-to-end test** — Run server + client locally, test full game flow with 3+ browser tabs
-- [ ] **Deploy to Coolify** — Follow DEPLOYMENT.md, verify WebSocket connectivity
 - [ ] **Input sanitization** — Validate stroke point coordinates are within canvas bounds, sanitize usernames
 - [ ] **Socket reconnection** — Handle player disconnect/reconnect mid-game (store playerId in localStorage, allow rejoin)
 

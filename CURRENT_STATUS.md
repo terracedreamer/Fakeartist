@@ -1,6 +1,6 @@
 # Current Status — Fake Artist
 
-> Last updated: 2026-03-21 (Session 2)
+> Last updated: 2026-03-28 (Session 3)
 
 ---
 
@@ -8,12 +8,27 @@
 
 | Component | Status | Notes |
 |-----------|--------|-------|
-| Backend | Built, not deployed | 11 source files, ready for Coolify |
-| Frontend | Built, not deployed | 24 source files (17 original + 7 new components/pages), build verified |
-| MongoDB | Not configured | Needs connection string in `.env` |
-| OpenAI API | Not configured | Needs `OPENAI_API_KEY` in `.env`; game works without it (fallback words) |
-| Socket.io | Implemented | Needs end-to-end testing with multiple clients |
+| Backend | Deployed (old code) | Needs redeploy after SSO push. Health check OK. |
+| Frontend | Deployed (old code) | Needs redeploy after SSO push (Sign In button not visible yet) |
+| MongoDB | Connected | Health endpoint shows `mongodb: connected` |
+| OpenAI API | Configured | `OPENAI_API_KEY` set in Coolify |
+| Socket.io | Working | Real-time events functional |
 | Docker | Dockerfiles ready | Backend: Node.js Alpine, Frontend: multi-stage Vite → Nginx Alpine |
+| MBS SSO | **CODE READY, NOT YET ACTIVE** | Needs Coolify env vars + redeploy (see below) |
+
+---
+
+## PENDING USER ACTIONS (SSO Activation)
+
+These must be done manually in Coolify before SSO works:
+
+1. **Fake Artist Backend** — Add env vars:
+   - `JWT_SECRET` = (copy from MBS Platform backend)
+   - `PLATFORM_URL` = `https://api.magicbusstudios.com`
+   - `PRODUCT_SLUG` = `fakeartist`
+2. **MBS Platform Backend** (`api.magicbusstudios.com`) — Add `https://fakeartist.magicbusstudios.com` to `CORS_ORIGINS`
+3. **Redeploy both** Fake Artist services (backend + frontend) in Coolify
+4. **Verify** — Visit site, click Sign In, complete platform login, verify redirect back
 
 ---
 
@@ -21,14 +36,14 @@
 
 - **Repo**: https://github.com/terracedreamer/Fakeartist
 - **Branch**: `main`
-- **Total commits**: 7
-- **Last commit**: `959870d` — `docs: update project CLAUDE.md with session learnings`
+- **Total commits**: 9
+- **Last commit**: `8935c96` — `feat: MBS Platform SSO migration`
 
 ---
 
 ## Known Issues
 
-1. **Not tested end-to-end yet** — Needs local testing with MongoDB and 3+ browser tabs
+1. **SSO not yet active** — Code pushed but Coolify env vars not yet set and services not redeployed
 2. **No reconnection handling** — Socket disconnect removes player. No rejoin mechanism.
 3. **No photo upload** — 8 avatar presets only.
 4. **No input sanitization on drawing data** — Stroke points not validated for bounds.
@@ -37,6 +52,7 @@
 7. **Fixed canvas size** — 400x400 player, 800x600 host. No coordinate normalization.
 8. **Discussion timer desync** — Client-side setInterval, should be server-authoritative.
 9. **No socket event throttling** — Only HTTP routes are rate-limited.
+10. **No premium features gated yet** — Entitlement check wired but no features use it.
 
 ---
 

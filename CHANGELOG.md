@@ -2,6 +2,33 @@
 
 ---
 
+## 2026-03-28 — MBS Platform SSO Migration (Session 3)
+
+### Added
+- `server/middleware/requireAuth.js` — JWT validation middleware (HS256, extracts userId/email/name/avatar/isAdmin)
+- `server/services/entitlementService.js` — Entitlement check with 5-min in-memory cache per userId
+- `server/routes/entitlement.js` — `GET /api/entitlement` protected route
+- `client/src/stores/authStore.js` — Zustand auth store for MBS Platform SSO
+- `platform-instructions/` — MBS Platform migration guide
+- `PHASE_5_REPORT_fakeartist.md` — Migration completion report
+
+### Changed
+- `server/server.js` — Wired entitlement route (`/api` prefix)
+- `server/config/env.js` — MONGO_URL/MONGODB_URI/MONGO_URI fallbacks, JWT_SECRET required
+- `server/package.json` — Added `jsonwebtoken` ^9.0.3
+- `client/src/App.jsx` — Token redirect on mount, legacy `/login` `/signup` → platform redirect
+- `client/src/pages/Landing.jsx` — Sign In / Logout button in top-right header
+- `client/src/pages/Home.jsx` — Pre-fill username from MBS Platform profile
+- `client/src/hooks/useSocket.js` — Kicked → `/play` (was `/`)
+- `.env.example` — Added JWT_SECRET, PLATFORM_URL, PRODUCT_SLUG
+
+### Notes
+- No files deleted — product had zero existing auth or billing code
+- Socket connections remain unauthenticated by design (party game UX)
+- Coolify env vars and CORS_ORIGINS update still pending (user action required)
+
+---
+
 ## 2026-03-21 — OpenAI Switch + Premium UI Overhaul (Session 2)
 
 ### Changed
